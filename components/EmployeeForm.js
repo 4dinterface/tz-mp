@@ -32,9 +32,7 @@ class EmployeeForm extends React.Component {
   }
   
   onAdd(){
-    var fields=this.refs.form.elements;
-    
-    console.log("add");
+    var fields=this.refs.form.elements;        
     
     if(this.onValid()){     
       console.log("valid");      
@@ -47,8 +45,25 @@ class EmployeeForm extends React.Component {
       });
     }
   }
+    
+  onChange(e){
+      //this.props.data.name.last=e.target.value;     
+      this.setState((state)={
+          var 
+          return state[]
+      })
+  }
+    
+  componentWillReceiveProps(){
+    this.setState({
+        data:this.props.data  //TODO скопировать
+    })
+  }
+    
   
-  render(){
+  render(){    
+    console.log("!!!!!!!!!!!!!");
+      
     return (
         <div ref="modal" className="modal modal-fixed-footer" >
           <div className="modal-content">      
@@ -56,19 +71,19 @@ class EmployeeForm extends React.Component {
               <form className="col s12" ref="form">         
                 <div className="row">
                   <div className="input-field col s12">
-                    <input name="firstName" id="first_name" type="text" required className="validate"/>
+                    <input name="firstName" id="first_name" type="text" className="validate" value={this.state.data.name.last} onChange={this.onChange.bind(this)} />        
                     <label htmlFor="first_name">First Name</label>
                   </div>    
                 </div>        
                 <div className="row">
                   <div className="input-field col s12">
-                    <input name="lastName" id="last_name" type="text" required className="validate"/>
+                    <input name="lastName" id="last_name" type="text" required className="validate" defaulValue={this.props.data.name.last}/>
                     <label htmlFor="last_name">Last Name</label>
                   </div>
                 </div>      
                 <div className="row">
                   <div className="input-field col s12">
-                    <input name="age" id="age" type="number" min="0" max="150" required className="validate"/>
+                    <input name="age" id="age" type="number" min="0" max="150" required className="validate" value={this.props.data.age} onChange={(e)=>this.props.data.age=e.target.value}/>
                     <label htmlFor="age">Age</label>
                   </div>
                 </div>                            
@@ -82,7 +97,7 @@ class EmployeeForm extends React.Component {
     );            
   }
   
-  componentDidUpdate(prevProps, prevState){        
+  componentDidUpdate(prevProps, prevState){              
     if(this.props.show){
       $(this.refs.modal).openModal({
         complete:()=>this.props.onCancel && this.props.onCancel()

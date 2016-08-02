@@ -8,10 +8,18 @@ class TableComponent extends React.Component {
     super(props);        
     //this.handleOptionsButtonClick = this.handleOptionsButtonClick.bind(this);
   }    
-  
-  render(){
-    console.log(this.props);
+
+  handleChange(e, guid){
+    e.preventDefault();
+    this.props.onChange(guid);
+  }    
     
+  handleRemove(e, guid){
+    e.preventDefault();  
+    this.props.onRemove(guid);  
+  }    
+  
+  render(){    
     return (
       <table className="striped" >
         <thead>
@@ -23,12 +31,19 @@ class TableComponent extends React.Component {
           </tr>
         </thead>      
         <tbody>          
-          {this.props.employees.map((item)=>{            
+          {this.props.employees.map((item)=>{     
+            //console.log(item);
+        
             return <tr>
               <td>{item.name.first}</td>
               <td>{item.name.last}</td>
               <td>{item.age}</td>
-              <td></td>
+            
+              <td>
+                <a href="" onClick={e=>this.handleChange(e, item.guid) }>edit </a>
+                <a href="" onClick={e=>this.handleRemove(e, item.guid) }>remove</a>                
+              </td>
+                
             </tr>
           })}
         </tbody>
