@@ -4,6 +4,7 @@ import React from 'react';
 import EmployeeForm from '../components/EmployeeForm';
 import {ADD_EMPLOYEE}  from "../actions";
 import {REMOVE_EMPLOYEE}  from "../actions";
+import {CHANGE_EMPLOYEE}  from "../actions";
   
 //import {INIT_EMPLOYEE}  from "../actio";
 
@@ -24,11 +25,12 @@ class APPComponent extends React.Component {
   }
   
   handleAddEmployeeClick(){
-    this.setState({
-      showDialog:true,
+    this.setState({      
       currentEmployee:{
         name:{}
-      }
+      },
+      showDialog:true,
+      operation:"add"
     })    
   }
     
@@ -36,32 +38,60 @@ class APPComponent extends React.Component {
     this.props.dispatch(REMOVE_EMPLOYEE(guid));          
   }
     
-  handleChangeEmployee(guid){        
+  handleChangeEmployee(guid){    
+    var data=Object.assign({}, this.props.employees.find(item=>item.guid==guid));
+    console.log("render", data.name.first);
+    
     this.setState({
+      currentEmployee: data,
       showDialog:true,
-      currentEmployee: Object.assign({}, this.props.employees.find(item=>item.guid==guid))      
+      operation:"edit"
     })      
   }
   
   handleFormOk(formData){
-    this.props.dispatch(ADD_EMPLOYEE(formData));    
+    if(this.state.currentEmployee.guid){
+      this.props.dispatch(CHANGE_EMPLOYEE(formData));  
+    } else {      
+      this.props.dispatch(ADD_EMPLOYEE(formData));
+    }
+    
     this.setState({
       showDialog:false
     })
   }
   
-  render(){          
+  getFilterEmployees(employees, filter){
+    if(!filter) return employees;
+    
+    return this.props.employees.filter((item)=>{
+      return item.name.first.indexOf(filter)>-1 || item.name.last.indexOf(filter)>-1
+    });
+  }
+  
+  render(){  
     return (
       <main className="container">    
         <EmployeeForm show={this.state.showDialog} data={this.state.currentEmployee} onOk={this.handleFormOk} />
-      
         <div className="section">
-          <TableComponent employees={this.props.employees} onRemove={this.handleRemoveEmployee} onChange={this.handleChangeEmployee}/>
-        </div>        
-        <div class="section">
-          <a className="waves-effect waves-light btn" onClick={this.handleAddEmployeeClick}>Добавить</a>       
+          <div className="input-field col s12">
+            <input name="filter" 
+                   id="filter" 
+                   type="text" 
+                   className="validate" 
+                   value={this.state.filter} 
+                   onChange={e=>this.setState({filter:e.target.value})}/> 
+          </div>
         </div>
-      
+        <div className="section">
+          <TableComponent 
+            employees={this.getFilterEmployees(this.props.employees, this.state.filter)} 
+            onRemove={this.handleRemoveEmployee} 
+            onChange={this.handleChangeEmployee}/>
+        </div>        
+        <div className="section">
+          <a className="waves-effect waves-light btn" onClick={this.handleAddEmployeeClick}>Добавить</a>       
+        </div>      
       </main>
     );            
   }

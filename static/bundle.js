@@ -58,15 +58,15 @@
 	
 	var _APP2 = _interopRequireDefault(_APP);
 	
-	var _reactRedux = __webpack_require__(176);
+	var _reactRedux = __webpack_require__(177);
 	
-	var _redux = __webpack_require__(183);
+	var _redux = __webpack_require__(184);
 	
-	var _reducers = __webpack_require__(199);
+	var _reducers = __webpack_require__(207);
 	
 	var _reducers2 = _interopRequireDefault(_reducers);
 	
-	var _actions = __webpack_require__(201);
+	var _actions = __webpack_require__(206);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -214,6 +214,8 @@
 /* 3 */
 /***/ function(module, exports) {
 
+	'use strict';
+	
 	// shim for using process in browser
 	var process = module.exports = {};
 	
@@ -21496,21 +21498,21 @@
 	  value: true
 	});
 	
-	var _Table = __webpack_require__(202);
+	var _Table = __webpack_require__(176);
 	
 	var _Table2 = _interopRequireDefault(_Table);
 	
-	var _reactRedux = __webpack_require__(176);
+	var _reactRedux = __webpack_require__(177);
 	
 	var _react = __webpack_require__(1);
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _EmployeeForm = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"../components/EmployeeForm\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	var _EmployeeForm = __webpack_require__(205);
 	
 	var _EmployeeForm2 = _interopRequireDefault(_EmployeeForm);
 	
-	var _actions = __webpack_require__(201);
+	var _actions = __webpack_require__(206);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -21534,10 +21536,11 @@
 	
 	  handleAddEmployeeClick() {
 	    this.setState({
-	      showDialog: true,
 	      currentEmployee: {
 	        name: {}
-	      }
+	      },
+	      showDialog: true,
+	      operation: "add"
 	    });
 	  }
 	
@@ -21546,16 +21549,33 @@
 	  }
 	
 	  handleChangeEmployee(guid) {
+	    var data = Object.assign({}, this.props.employees.find(item => item.guid == guid));
+	    console.log("render", data.name.first);
+	
 	    this.setState({
+	      currentEmployee: data,
 	      showDialog: true,
-	      currentEmployee: Object.assign({}, this.props.employees.find(item => item.guid == guid))
+	      operation: "edit"
 	    });
 	  }
 	
 	  handleFormOk(formData) {
-	    this.props.dispatch((0, _actions.ADD_EMPLOYEE)(formData));
+	    if (this.state.currentEmployee.guid) {
+	      this.props.dispatch((0, _actions.CHANGE_EMPLOYEE)(formData));
+	    } else {
+	      this.props.dispatch((0, _actions.ADD_EMPLOYEE)(formData));
+	    }
+	
 	    this.setState({
 	      showDialog: false
+	    });
+	  }
+	
+	  getFilterEmployees(employees, filter) {
+	    if (!filter) return employees;
+	
+	    return this.props.employees.filter(item => {
+	      return item.name.first.indexOf(filter) > -1 || item.name.last.indexOf(filter) > -1;
 	    });
 	  }
 	
@@ -21567,11 +21587,28 @@
 	      _react2.default.createElement(
 	        'div',
 	        { className: 'section' },
-	        _react2.default.createElement(_Table2.default, { employees: this.props.employees, onRemove: this.handleRemoveEmployee, onChange: this.handleChangeEmployee })
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'input-field col s12' },
+	          _react2.default.createElement('input', { name: 'filter',
+	            id: 'filter',
+	            type: 'text',
+	            className: 'validate',
+	            value: this.state.filter,
+	            onChange: e => this.setState({ filter: e.target.value }) })
+	        )
 	      ),
 	      _react2.default.createElement(
 	        'div',
-	        { 'class': 'section' },
+	        { className: 'section' },
+	        _react2.default.createElement(_Table2.default, {
+	          employees: this.getFilterEmployees(this.props.employees, this.state.filter),
+	          onRemove: this.handleRemoveEmployee,
+	          onChange: this.handleChangeEmployee })
+	      ),
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'section' },
 	        _react2.default.createElement(
 	          'a',
 	          { className: 'waves-effect waves-light btn', onClick: this.handleAddEmployeeClick },
@@ -21597,14 +21634,130 @@
 
 	'use strict';
 	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRedux = __webpack_require__(177);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	//import {INIT_EMPLOYEE}  from "../actions";
+	
+	// Manually bind, wherever you need to
+	class TableComponent extends _react2.default.Component {
+	  constructor(props) {
+	    super(props);
+	    //this.handleOptionsButtonClick = this.handleOptionsButtonClick.bind(this);
+	  }
+	
+	  handleChange(e, guid) {
+	    e.preventDefault();
+	    this.props.onChange(guid);
+	  }
+	
+	  handleRemove(e, guid) {
+	    e.preventDefault();
+	    this.props.onRemove(guid);
+	  }
+	
+	  render() {
+	    return _react2.default.createElement(
+	      'table',
+	      { className: 'striped' },
+	      _react2.default.createElement(
+	        'thead',
+	        null,
+	        _react2.default.createElement(
+	          'tr',
+	          null,
+	          _react2.default.createElement(
+	            'th',
+	            { 'data-field': 'FirstName' },
+	            'First'
+	          ),
+	          _react2.default.createElement(
+	            'th',
+	            { 'data-field': 'LastName' },
+	            'Last Name'
+	          ),
+	          _react2.default.createElement(
+	            'th',
+	            { 'data-field': 'Age' },
+	            'Age'
+	          ),
+	          _react2.default.createElement(
+	            'th',
+	            { 'data-field': 'Actions' },
+	            'Actions'
+	          )
+	        )
+	      ),
+	      _react2.default.createElement(
+	        'tbody',
+	        null,
+	        this.props.employees.map(item => {
+	          //console.log(item);
+	
+	          return _react2.default.createElement(
+	            'tr',
+	            null,
+	            _react2.default.createElement(
+	              'td',
+	              null,
+	              item.name.first
+	            ),
+	            _react2.default.createElement(
+	              'td',
+	              null,
+	              item.name.last
+	            ),
+	            _react2.default.createElement(
+	              'td',
+	              null,
+	              item.age
+	            ),
+	            _react2.default.createElement(
+	              'td',
+	              null,
+	              _react2.default.createElement(
+	                'a',
+	                { href: '', onClick: e => this.handleChange(e, item.guid) },
+	                'edit '
+	              ),
+	              _react2.default.createElement(
+	                'a',
+	                { href: '', onClick: e => this.handleRemove(e, item.guid) },
+	                'remove'
+	              )
+	            )
+	          );
+	        })
+	      )
+	    );
+	  }
+	}
+	
+	exports.default = TableComponent;
+
+/***/ },
+/* 177 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
 	exports.__esModule = true;
 	exports.connect = exports.Provider = undefined;
 	
-	var _Provider = __webpack_require__(177);
+	var _Provider = __webpack_require__(178);
 	
 	var _Provider2 = _interopRequireDefault(_Provider);
 	
-	var _connect = __webpack_require__(180);
+	var _connect = __webpack_require__(181);
 	
 	var _connect2 = _interopRequireDefault(_connect);
 	
@@ -21616,7 +21769,7 @@
 	exports.connect = _connect2["default"];
 
 /***/ },
-/* 177 */
+/* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -21626,11 +21779,11 @@
 	
 	var _react = __webpack_require__(1);
 	
-	var _storeShape = __webpack_require__(178);
+	var _storeShape = __webpack_require__(179);
 	
 	var _storeShape2 = _interopRequireDefault(_storeShape);
 	
-	var _warning = __webpack_require__(179);
+	var _warning = __webpack_require__(180);
 	
 	var _warning2 = _interopRequireDefault(_warning);
 	
@@ -21714,7 +21867,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 178 */
+/* 179 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21730,7 +21883,7 @@
 	});
 
 /***/ },
-/* 179 */
+/* 180 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21759,7 +21912,7 @@
 	}
 
 /***/ },
-/* 180 */
+/* 181 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -21779,31 +21932,31 @@
 	
 	var _react = __webpack_require__(1);
 	
-	var _storeShape = __webpack_require__(178);
+	var _storeShape = __webpack_require__(179);
 	
 	var _storeShape2 = _interopRequireDefault(_storeShape);
 	
-	var _shallowEqual = __webpack_require__(181);
+	var _shallowEqual = __webpack_require__(182);
 	
 	var _shallowEqual2 = _interopRequireDefault(_shallowEqual);
 	
-	var _wrapActionCreators = __webpack_require__(182);
+	var _wrapActionCreators = __webpack_require__(183);
 	
 	var _wrapActionCreators2 = _interopRequireDefault(_wrapActionCreators);
 	
-	var _warning = __webpack_require__(179);
+	var _warning = __webpack_require__(180);
 	
 	var _warning2 = _interopRequireDefault(_warning);
 	
-	var _isPlainObject = __webpack_require__(185);
+	var _isPlainObject = __webpack_require__(198);
 	
 	var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 	
-	var _hoistNonReactStatics = __webpack_require__(197);
+	var _hoistNonReactStatics = __webpack_require__(203);
 	
 	var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 	
-	var _invariant = __webpack_require__(198);
+	var _invariant = __webpack_require__(204);
 	
 	var _invariant2 = _interopRequireDefault(_invariant);
 	
@@ -22180,7 +22333,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 181 */
+/* 182 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -22211,7 +22364,7 @@
 	}
 
 /***/ },
-/* 182 */
+/* 183 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22219,7 +22372,7 @@
 	exports.__esModule = true;
 	exports["default"] = wrapActionCreators;
 	
-	var _redux = __webpack_require__(183);
+	var _redux = __webpack_require__(184);
 	
 	function wrapActionCreators(actionCreators) {
 	  return function (dispatch) {
@@ -22228,7 +22381,7 @@
 	}
 
 /***/ },
-/* 183 */
+/* 184 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -22236,27 +22389,27 @@
 	exports.__esModule = true;
 	exports.compose = exports.applyMiddleware = exports.bindActionCreators = exports.combineReducers = exports.createStore = undefined;
 	
-	var _createStore = __webpack_require__(184);
+	var _createStore = __webpack_require__(185);
 	
 	var _createStore2 = _interopRequireDefault(_createStore);
 	
-	var _combineReducers = __webpack_require__(192);
+	var _combineReducers = __webpack_require__(193);
 	
 	var _combineReducers2 = _interopRequireDefault(_combineReducers);
 	
-	var _bindActionCreators = __webpack_require__(194);
+	var _bindActionCreators = __webpack_require__(195);
 	
 	var _bindActionCreators2 = _interopRequireDefault(_bindActionCreators);
 	
-	var _applyMiddleware = __webpack_require__(195);
+	var _applyMiddleware = __webpack_require__(196);
 	
 	var _applyMiddleware2 = _interopRequireDefault(_applyMiddleware);
 	
-	var _compose = __webpack_require__(196);
+	var _compose = __webpack_require__(197);
 	
 	var _compose2 = _interopRequireDefault(_compose);
 	
-	var _warning = __webpack_require__(193);
+	var _warning = __webpack_require__(194);
 	
 	var _warning2 = _interopRequireDefault(_warning);
 	
@@ -22282,7 +22435,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 184 */
+/* 185 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22291,11 +22444,11 @@
 	exports.ActionTypes = undefined;
 	exports["default"] = createStore;
 	
-	var _isPlainObject = __webpack_require__(185);
+	var _isPlainObject = __webpack_require__(186);
 	
 	var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 	
-	var _symbolObservable = __webpack_require__(190);
+	var _symbolObservable = __webpack_require__(191);
 	
 	var _symbolObservable2 = _interopRequireDefault(_symbolObservable);
 	
@@ -22551,14 +22704,14 @@
 	}
 
 /***/ },
-/* 185 */
+/* 186 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var getPrototype = __webpack_require__(186),
-	    isHostObject = __webpack_require__(188),
-	    isObjectLike = __webpack_require__(189);
+	var getPrototype = __webpack_require__(187),
+	    isHostObject = __webpack_require__(189),
+	    isObjectLike = __webpack_require__(190);
 	
 	/** `Object#toString` result references. */
 	var objectTag = '[object Object]';
@@ -22626,12 +22779,12 @@
 	module.exports = isPlainObject;
 
 /***/ },
-/* 186 */
+/* 187 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var overArg = __webpack_require__(187);
+	var overArg = __webpack_require__(188);
 	
 	/* Built-in method references for those with the same name as other `lodash` methods. */
 	var nativeGetPrototype = Object.getPrototypeOf;
@@ -22648,7 +22801,7 @@
 	module.exports = getPrototype;
 
 /***/ },
-/* 187 */
+/* 188 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -22670,7 +22823,7 @@
 	module.exports = overArg;
 
 /***/ },
-/* 188 */
+/* 189 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22697,7 +22850,7 @@
 	module.exports = isHostObject;
 
 /***/ },
-/* 189 */
+/* 190 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22733,17 +22886,17 @@
 	module.exports = isObjectLike;
 
 /***/ },
-/* 190 */
+/* 191 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/* global window */
 	'use strict';
 	
-	module.exports = __webpack_require__(191)(global || window || undefined);
+	module.exports = __webpack_require__(192)(global || window || undefined);
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 191 */
+/* 192 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22767,7 +22920,7 @@
 	};
 
 /***/ },
-/* 192 */
+/* 193 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -22775,13 +22928,13 @@
 	exports.__esModule = true;
 	exports["default"] = combineReducers;
 	
-	var _createStore = __webpack_require__(184);
+	var _createStore = __webpack_require__(185);
 	
-	var _isPlainObject = __webpack_require__(185);
+	var _isPlainObject = __webpack_require__(186);
 	
 	var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 	
-	var _warning = __webpack_require__(193);
+	var _warning = __webpack_require__(194);
 	
 	var _warning2 = _interopRequireDefault(_warning);
 	
@@ -22902,7 +23055,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 193 */
+/* 194 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22932,7 +23085,7 @@
 	}
 
 /***/ },
-/* 194 */
+/* 195 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22988,7 +23141,7 @@
 	}
 
 /***/ },
-/* 195 */
+/* 196 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -23007,7 +23160,7 @@
 	
 	exports["default"] = applyMiddleware;
 	
-	var _compose = __webpack_require__(196);
+	var _compose = __webpack_require__(197);
 	
 	var _compose2 = _interopRequireDefault(_compose);
 	
@@ -23061,7 +23214,7 @@
 	}
 
 /***/ },
-/* 196 */
+/* 197 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -23106,7 +23259,189 @@
 	}
 
 /***/ },
-/* 197 */
+/* 198 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var getPrototype = __webpack_require__(199),
+	    isHostObject = __webpack_require__(201),
+	    isObjectLike = __webpack_require__(202);
+	
+	/** `Object#toString` result references. */
+	var objectTag = '[object Object]';
+	
+	/** Used for built-in method references. */
+	var objectProto = Object.prototype;
+	
+	/** Used to resolve the decompiled source of functions. */
+	var funcToString = Function.prototype.toString;
+	
+	/** Used to check objects for own properties. */
+	var hasOwnProperty = objectProto.hasOwnProperty;
+	
+	/** Used to infer the `Object` constructor. */
+	var objectCtorString = funcToString.call(Object);
+	
+	/**
+	 * Used to resolve the
+	 * [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+	 * of values.
+	 */
+	var objectToString = objectProto.toString;
+	
+	/**
+	 * Checks if `value` is a plain object, that is, an object created by the
+	 * `Object` constructor or one with a `[[Prototype]]` of `null`.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 0.8.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a plain object,
+	 *  else `false`.
+	 * @example
+	 *
+	 * function Foo() {
+	 *   this.a = 1;
+	 * }
+	 *
+	 * _.isPlainObject(new Foo);
+	 * // => false
+	 *
+	 * _.isPlainObject([1, 2, 3]);
+	 * // => false
+	 *
+	 * _.isPlainObject({ 'x': 0, 'y': 0 });
+	 * // => true
+	 *
+	 * _.isPlainObject(Object.create(null));
+	 * // => true
+	 */
+	function isPlainObject(value) {
+	  if (!isObjectLike(value) || objectToString.call(value) != objectTag || isHostObject(value)) {
+	    return false;
+	  }
+	  var proto = getPrototype(value);
+	  if (proto === null) {
+	    return true;
+	  }
+	  var Ctor = hasOwnProperty.call(proto, 'constructor') && proto.constructor;
+	  return typeof Ctor == 'function' && Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString;
+	}
+	
+	module.exports = isPlainObject;
+
+/***/ },
+/* 199 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var overArg = __webpack_require__(200);
+	
+	/* Built-in method references for those with the same name as other `lodash` methods. */
+	var nativeGetPrototype = Object.getPrototypeOf;
+	
+	/**
+	 * Gets the `[[Prototype]]` of `value`.
+	 *
+	 * @private
+	 * @param {*} value The value to query.
+	 * @returns {null|Object} Returns the `[[Prototype]]`.
+	 */
+	var getPrototype = overArg(nativeGetPrototype, Object);
+	
+	module.exports = getPrototype;
+
+/***/ },
+/* 200 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	/**
+	 * Creates a function that invokes `func` with its first argument transformed.
+	 *
+	 * @private
+	 * @param {Function} func The function to wrap.
+	 * @param {Function} transform The argument transform.
+	 * @returns {Function} Returns the new function.
+	 */
+	function overArg(func, transform) {
+	  return function (arg) {
+	    return func(transform(arg));
+	  };
+	}
+	
+	module.exports = overArg;
+
+/***/ },
+/* 201 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	/**
+	 * Checks if `value` is a host object in IE < 9.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
+	 */
+	function isHostObject(value) {
+	  // Many host objects are `Object` objects that can coerce to strings
+	  // despite having improperly defined `toString` methods.
+	  var result = false;
+	  if (value != null && typeof value.toString != 'function') {
+	    try {
+	      result = !!(value + '');
+	    } catch (e) {}
+	  }
+	  return result;
+	}
+	
+	module.exports = isHostObject;
+
+/***/ },
+/* 202 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	/**
+	 * Checks if `value` is object-like. A value is object-like if it's not `null`
+	 * and has a `typeof` result of "object".
+	 *
+	 * @static
+	 * @memberOf _
+	 * @since 4.0.0
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+	 * @example
+	 *
+	 * _.isObjectLike({});
+	 * // => true
+	 *
+	 * _.isObjectLike([1, 2, 3]);
+	 * // => true
+	 *
+	 * _.isObjectLike(_.noop);
+	 * // => false
+	 *
+	 * _.isObjectLike(null);
+	 * // => false
+	 */
+	function isObjectLike(value) {
+	  return !!value && typeof value == 'object';
+	}
+	
+	module.exports = isObjectLike;
+
+/***/ },
+/* 203 */
 /***/ function(module, exports) {
 
 	/**
@@ -23160,7 +23495,7 @@
 	};
 
 /***/ },
-/* 198 */
+/* 204 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -23214,7 +23549,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 199 */
+/* 205 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -23223,77 +23558,181 @@
 	  value: true
 	});
 	
-	var _redux = __webpack_require__(183);
+	var _react = __webpack_require__(1);
 	
-	var _employees = __webpack_require__(200);
+	var _react2 = _interopRequireDefault(_react);
 	
-	var _employees2 = _interopRequireDefault(_employees);
+	var _reactRedux = __webpack_require__(177);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	const appReducers = (0, _redux.combineReducers)({
-	  employees: _employees2.default
-	});
+	//import {INIT_EMPLOYEE}  from "../actions";
 	
-	exports.default = appReducers;
-
-/***/ },
-/* 200 */
-/***/ function(module, exports) {
-
-	'use strict';
+	// Manually bind, wherever you need to
+	class EmployeeForm extends _react2.default.Component {
 	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	const employee = (state, action) => {
-	  switch (action.type) {
-	    case 'ADD_EMPLOYEE':
-	      console.log("add reducer", action);
-	      return {
-	        firstName: action.data.firstName,
-	        lastName: action.data.lastName,
-	        age: action.data.age
-	      };
-	
-	    case 'CHANGE_EMPLOYEE':
-	      return state; //TODO НУЖНА ЛОГИКА ИЗМЕНЕНИЯ
-	
-	    default:
-	      return state;
+	  constructor(props) {
+	    super(props);
+	    this.onAdd = this.onAdd.bind(this);
+	    this.state = {
+	      name: {}
+	    };
 	  }
-	};
 	
-	const employees = (state = [], action) => {
-	  switch (action.type) {
-	    case 'ADD_EMPLOYEE':
-	      return {
-	        emloyees: [...state, employee(undefined, action)]
-	      };
+	  onValid() {
+	    var fields = this.refs.form.elements;
+	    //TODO - сделать
+	    /*if(!fields.firstName.checkValidity()){
+	      fields.firstName.setCustomValidity("Invalid field.");
+	      return false;
+	    }*/
 	
-	    case 'CHANGE_EMPLOYEE':
-	      return state.map(t => {
-	        //todo(t, action)
-	        return {};
+	    /*if(fields.lastName.valid){
+	      fields.lastName.setCustomValidity("Invalid field.");
+	      return false;
+	    }
+	    
+	    if(!fields.age.valid){
+	      fields.age.setCustomValidity("Invalid field.");
+	      return false;      
+	    }*/
+	
+	    return true;
+	  }
+	
+	  onAdd() {
+	    var fields = this.refs.form.elements;
+	
+	    if (this.onValid()) {
+	      console.log("valid");
+	
+	      $(this.refs.modal).closeModal();
+	      this.props.onOk({
+	        firstName: fields.firstName.value,
+	        lastName: fields.lastName.value,
+	        age: fields.age.value
 	      });
-	
-	    case 'REMOVE_EMPLOYEE':
-	      var index = state.findIndex(item => item.guid === action.guid);
-	      //console.log("удаляю ",action.guid)      
-	      return [...state.slice(0, index), ...state.slice(index + 1)];
-	
-	    case 'INIT_EMPLOYEE':
-	      return [...action.data];
-	
-	    default:
-	      return state;
+	    }
 	  }
-	};
 	
-	exports.default = employees;
+	  onChange(e) {
+	    //this.props.data.name.last=e.target.value;     
+	    /*this.setState({
+	      
+	    })*/
+	  }
+	
+	  componentWillReceiveProps(props, newProp) {
+	    console.log(props);
+	
+	    this.setState(props.data);
+	    //console.log("init form from prop", this.props.data.name.first);
+	  }
+	
+	  render() {
+	    //console.log("!!!!!!!!!!!!!");
+	
+	    return _react2.default.createElement(
+	      'div',
+	      { ref: 'modal', className: 'modal modal-fixed-footer' },
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'modal-content' },
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'row' },
+	          _react2.default.createElement(
+	            'form',
+	            { className: 'col s12', ref: 'form' },
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'row' },
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'input-field col s12' },
+	                _react2.default.createElement('input', { name: 'firstName',
+	                  id: 'first_name',
+	                  type: 'text',
+	                  className: 'validate',
+	                  value: this.state.name.first,
+	                  onChange: e => this.setState({ name: { first: e.target.value } }) }),
+	                _react2.default.createElement(
+	                  'label',
+	                  { htmlFor: 'first_name' },
+	                  'First Name'
+	                )
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'row' },
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'input-field col s12' },
+	                _react2.default.createElement('input', { name: 'lastName',
+	                  id: 'last_name',
+	                  type: 'text',
+	                  className: 'validate',
+	                  value: this.state.name.last,
+	                  onChange: e => this.setState({ name: { last: e.target.value } }) }),
+	                _react2.default.createElement(
+	                  'label',
+	                  { htmlFor: 'last_name' },
+	                  'Last Name'
+	                )
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'row' },
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'input-field col s12' },
+	                _react2.default.createElement('input', { name: 'age',
+	                  id: 'age',
+	                  type: 'number',
+	                  min: '0',
+	                  max: '150',
+	                  className: 'validate',
+	                  value: this.state.age,
+	                  onChange: e => this.setState({ age: e.target.value }) }),
+	                _react2.default.createElement(
+	                  'label',
+	                  { htmlFor: 'age' },
+	                  'Age'
+	                )
+	              )
+	            )
+	          )
+	        )
+	      ),
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'modal-footer' },
+	        _react2.default.createElement(
+	          'a',
+	          { href: '#!', className: 'modal-action waves-effect waves-green btn-flat ', onClick: this.onAdd },
+	          'Добавить'
+	        )
+	      )
+	    );
+	  }
+	
+	  componentDidUpdate(prevProps, prevState) {
+	    if (this.props.show) {
+	      $(this.refs.modal).openModal({
+	        dismissible: false,
+	        complete: () => this.props.onCancel && this.props.onCancel()
+	      });
+	      Materialize.updateTextFields();
+	    }
+	  }
+	}
+	
+	exports.default = EmployeeForm;
 
 /***/ },
-/* 201 */
+/* 206 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -23333,7 +23772,7 @@
 	};
 
 /***/ },
-/* 202 */
+/* 207 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -23342,111 +23781,73 @@
 	  value: true
 	});
 	
-	var _react = __webpack_require__(1);
+	var _redux = __webpack_require__(184);
 	
-	var _react2 = _interopRequireDefault(_react);
+	var _employees = __webpack_require__(208);
 	
-	var _reactRedux = __webpack_require__(176);
+	var _employees2 = _interopRequireDefault(_employees);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	//import {INIT_EMPLOYEE}  from "../actions";
+	const appReducers = (0, _redux.combineReducers)({
+	  employees: _employees2.default
+	});
 	
-	// Manually bind, wherever you need to
-	class TableComponent extends _react2.default.Component {
-	  constructor(props) {
-	    super(props);
-	    //this.handleOptionsButtonClick = this.handleOptionsButtonClick.bind(this);
+	exports.default = appReducers;
+
+/***/ },
+/* 208 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	const employee = (state, action) => {
+	  switch (action.type) {
+	    case 'ADD_EMPLOYEE':
+	      console.log("add reducer", action);
+	      return {
+	        name: {
+	          first: action.data.firstName,
+	          last: action.data.lastName
+	        },
+	        age: action.data.age
+	      };
+	
+	    case 'CHANGE_EMPLOYEE':
+	
+	      return action.data; //TODO НУЖНА ЛОГИКА ИЗМЕНЕНИЯ
+	
+	    default:
+	      return state;
 	  }
+	};
 	
-	  handleChange(e, guid) {
-	    e.preventDefault();
-	    this.props.onChange(guid);
+	const employees = (state = [], action) => {
+	  switch (action.type) {
+	    case 'ADD_EMPLOYEE':
+	      return [...state, employee(undefined, action)];
+	    case 'CHANGE_EMPLOYEE':
+	      return state.map(item => {
+	        return employee(item);
+	      });
+	
+	    case 'REMOVE_EMPLOYEE':
+	      var index = state.findIndex(item => item.guid === action.guid);
+	      //console.log("удаляю ",action.guid)      
+	      return [...state.slice(0, index), ...state.slice(index + 1)];
+	
+	    case 'INIT_EMPLOYEE':
+	      return [...action.data];
+	
+	    default:
+	      return state;
 	  }
+	};
 	
-	  handleRemove(e, guid) {
-	    e.preventDefault();
-	    this.props.onRemove(guid);
-	  }
-	
-	  render() {
-	    return _react2.default.createElement(
-	      'table',
-	      { className: 'striped' },
-	      _react2.default.createElement(
-	        'thead',
-	        null,
-	        _react2.default.createElement(
-	          'tr',
-	          null,
-	          _react2.default.createElement(
-	            'th',
-	            { 'data-field': 'FirstName' },
-	            'First'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            { 'data-field': 'LastName' },
-	            'Last Name'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            { 'data-field': 'Age' },
-	            'Age'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            { 'data-field': 'Actions' },
-	            'Actions'
-	          )
-	        )
-	      ),
-	      _react2.default.createElement(
-	        'tbody',
-	        null,
-	        this.props.employees.map(item => {
-	          //console.log(item);
-	
-	          return _react2.default.createElement(
-	            'tr',
-	            null,
-	            _react2.default.createElement(
-	              'td',
-	              null,
-	              item.name.first
-	            ),
-	            _react2.default.createElement(
-	              'td',
-	              null,
-	              item.name.last
-	            ),
-	            _react2.default.createElement(
-	              'td',
-	              null,
-	              item.age
-	            ),
-	            _react2.default.createElement(
-	              'td',
-	              null,
-	              _react2.default.createElement(
-	                'a',
-	                { href: '', onClick: e => this.handleChange(e, item.guid) },
-	                'edit '
-	              ),
-	              _react2.default.createElement(
-	                'a',
-	                { href: '', onClick: e => this.handleRemove(e, item.guid) },
-	                'remove'
-	              )
-	            )
-	          );
-	        })
-	      )
-	    );
-	  }
-	}
-	
-	exports.default = TableComponent;
+	exports.default = employees;
 
 /***/ }
 /******/ ]);

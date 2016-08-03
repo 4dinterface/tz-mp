@@ -3,14 +3,17 @@ const employee = (state, action) => {
     case 'ADD_EMPLOYEE':
       console.log("add reducer", action);
       return {
-        firstName: action.data.firstName,
-        lastName: action.data.lastName,
+        name:{
+          first: action.data.firstName,
+          last: action.data.lastName,
+        },
         age: action.data.age
       }      
       
     case 'CHANGE_EMPLOYEE':
-      return state //TODO НУЖНА ЛОГИКА ИЗМЕНЕНИЯ
       
+      return action.data //TODO НУЖНА ЛОГИКА ИЗМЕНЕНИЯ
+    
     default:
       return state
   }
@@ -19,17 +22,13 @@ const employee = (state, action) => {
 const employees = (state=[], action) => {
   switch (action.type) {
     case 'ADD_EMPLOYEE':       
-      return {
-        emloyees:[
+      return[
           ...state,
           employee(undefined, action)
-        ]
-      }
-      
+      ]            
     case 'CHANGE_EMPLOYEE':
-      return state.map(t =>{
-        //todo(t, action)
-        return {};
+      return state.map(item =>{        
+        return employee(item)
       })
       
     case 'REMOVE_EMPLOYEE':          

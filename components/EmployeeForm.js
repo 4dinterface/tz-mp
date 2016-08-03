@@ -8,6 +8,9 @@ class EmployeeForm extends React.Component {
   constructor(props) {
     super(props);
     this.onAdd = this.onAdd.bind(this);
+    this.state={
+      name:{}        
+    };
   }
   
   onValid(){
@@ -48,21 +51,21 @@ class EmployeeForm extends React.Component {
     
   onChange(e){
       //this.props.data.name.last=e.target.value;     
-      this.setState((state)={
-          var 
-          return state[]
-      })
+      /*this.setState({
+        
+      })*/
   }
     
-  componentWillReceiveProps(){
-    this.setState({
-        data:this.props.data  //TODO скопировать
-    })
+  componentWillReceiveProps(props,newProp){    
+    console.log(props);
+    
+    this.setState(props.data);
+    //console.log("init form from prop", this.props.data.name.first);
   }
     
   
   render(){    
-    console.log("!!!!!!!!!!!!!");
+    //console.log("!!!!!!!!!!!!!");
       
     return (
         <div ref="modal" className="modal modal-fixed-footer" >
@@ -71,19 +74,38 @@ class EmployeeForm extends React.Component {
               <form className="col s12" ref="form">         
                 <div className="row">
                   <div className="input-field col s12">
-                    <input name="firstName" id="first_name" type="text" className="validate" value={this.state.data.name.last} onChange={this.onChange.bind(this)} />        
+                    <input name="firstName" 
+                           id="first_name" 
+                           type="text" 
+                           className="validate" 
+                           value={this.state.name.first} 
+                           onChange={e=>this.setState({name:{first:e.target.value}})}/>   
+      
                     <label htmlFor="first_name">First Name</label>
                   </div>    
                 </div>        
                 <div className="row">
                   <div className="input-field col s12">
-                    <input name="lastName" id="last_name" type="text" required className="validate" defaulValue={this.props.data.name.last}/>
+                    <input name="lastName" 
+                           id="last_name" 
+                           type="text" 
+                           className="validate" 
+                           value={this.state.name.last}
+                           onChange={e=>this.setState({name:{last:e.target.value}})}/>
                     <label htmlFor="last_name">Last Name</label>
                   </div>
                 </div>      
                 <div className="row">
                   <div className="input-field col s12">
-                    <input name="age" id="age" type="number" min="0" max="150" required className="validate" value={this.props.data.age} onChange={(e)=>this.props.data.age=e.target.value}/>
+                    <input name="age" 
+                           id="age" 
+                           type="number" 
+                           min="0" 
+                           max="150" 
+                           className="validate" 
+                           value={this.state.age} 
+                           onChange={e=>this.setState({age:e.target.value})}/>
+                           
                     <label htmlFor="age">Age</label>
                   </div>
                 </div>                            
@@ -100,9 +122,11 @@ class EmployeeForm extends React.Component {
   componentDidUpdate(prevProps, prevState){              
     if(this.props.show){
       $(this.refs.modal).openModal({
+        dismissible: false,
         complete:()=>this.props.onCancel && this.props.onCancel()
       });
-    }
+      Materialize.updateTextFields();
+    }    
   }  
 }                        
             
