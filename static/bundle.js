@@ -21701,8 +21701,6 @@
 	        'tbody',
 	        null,
 	        this.props.employees.map(item => {
-	          //console.log(item);
-	
 	          return _react2.default.createElement(
 	            'tr',
 	            null,
@@ -23586,7 +23584,6 @@
 	      fields.firstName.setCustomValidity("Invalid field.");
 	      return false;
 	    }*/
-	
 	    /*if(fields.lastName.valid){
 	      fields.lastName.setCustomValidity("Invalid field.");
 	      return false;
@@ -23596,7 +23593,6 @@
 	      fields.age.setCustomValidity("Invalid field.");
 	      return false;      
 	    }*/
-	
 	    return true;
 	  }
 	
@@ -23604,13 +23600,14 @@
 	    var fields = this.refs.form.elements;
 	
 	    if (this.onValid()) {
-	      console.log("valid");
-	
 	      $(this.refs.modal).closeModal();
+	      console.log(this.state);
+	
 	      this.props.onOk({
 	        firstName: fields.firstName.value,
 	        lastName: fields.lastName.value,
-	        age: fields.age.value
+	        age: fields.age.value,
+	        guid: this.state.guid
 	      });
 	    }
 	  }
@@ -23630,8 +23627,6 @@
 	  }
 	
 	  render() {
-	    //console.log("!!!!!!!!!!!!!");
-	
 	    return _react2.default.createElement(
 	      'div',
 	      { ref: 'modal', className: 'modal modal-fixed-footer' },
@@ -23743,6 +23738,7 @@
 	let nextTodoId = 0;
 	
 	const ADD_EMPLOYEE = exports.ADD_EMPLOYEE = data => {
+	  console.log(data);
 	  return {
 	    type: 'ADD_EMPLOYEE',
 	    data
@@ -23750,10 +23746,10 @@
 	  };
 	};
 	
-	const CHANGE_EMPLOYEE = exports.CHANGE_EMPLOYEE = change => {
+	const CHANGE_EMPLOYEE = exports.CHANGE_EMPLOYEE = data => {
 	  return {
 	    type: 'CHANGE_EMPLOYEE',
-	    filter
+	    data
 	  };
 	};
 	
@@ -23807,7 +23803,6 @@
 	const employee = (state, action) => {
 	  switch (action.type) {
 	    case 'ADD_EMPLOYEE':
-	      console.log("add reducer", action);
 	      return {
 	        name: {
 	          first: action.data.firstName,
@@ -23817,9 +23812,20 @@
 	      };
 	
 	    case 'CHANGE_EMPLOYEE':
+	      console.log("CHANGE EMPLOYEE", action.data.guid != state.guid, action.data.guid);
+	      if (action.data.guid == state.guid) {
+	        console.log(Object.assign({}, state, action.data));
+	      }
 	
-	      return action.data; //TODO НУЖНА ЛОГИКА ИЗМЕНЕНИЯ
-	
+	      return action.data.guid != state.guid ? state : {
+	        guid: state.guid,
+	        age: action.data.age,
+	        email: state.email,
+	        name: {
+	          first: action.data.firstName,
+	          last: action.data.lastName
+	        }
+	      };
 	    default:
 	      return state;
 	  }
@@ -23831,7 +23837,7 @@
 	      return [...state, employee(undefined, action)];
 	    case 'CHANGE_EMPLOYEE':
 	      return state.map(item => {
-	        return employee(item);
+	        return employee(item, action);
 	      });
 	
 	    case 'REMOVE_EMPLOYEE':

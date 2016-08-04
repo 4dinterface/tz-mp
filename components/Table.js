@@ -1,4 +1,4 @@
-  import React from 'react';
+import React from 'react';
 import { connect } from 'react-redux'
 //import {INIT_EMPLOYEE}  from "../actions";
   
@@ -31,9 +31,7 @@ class TableComponent extends React.Component {
           </tr>
         </thead>      
         <tbody>          
-          {this.props.employees.map((item)=>{     
-            //console.log(item);
-        
+          {this.props.employees.map((item)=>{        
             return <tr>
               <td>{item.name.first}</td>
               <td>{item.name.last}</td>

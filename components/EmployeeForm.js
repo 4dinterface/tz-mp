@@ -19,8 +19,7 @@ class EmployeeForm extends React.Component {
     /*if(!fields.firstName.checkValidity()){
       fields.firstName.setCustomValidity("Invalid field.");
       return false;
-    }*/
-    
+    }*/    
     /*if(fields.lastName.valid){
       fields.lastName.setCustomValidity("Invalid field.");
       return false;
@@ -29,8 +28,7 @@ class EmployeeForm extends React.Component {
     if(!fields.age.valid){
       fields.age.setCustomValidity("Invalid field.");
       return false;      
-    }*/
-    
+    }*/    
     return true;
   }
   
@@ -38,13 +36,14 @@ class EmployeeForm extends React.Component {
     var fields=this.refs.form.elements;        
     
     if(this.onValid()){     
-      console.log("valid");      
-      
       $(this.refs.modal).closeModal();
+      console.log(this.state);
+      
       this.props.onOk({
         firstName: fields.firstName.value,
         lastName: fields.lastName.value,
-        age: fields.age.value
+        age: fields.age.value,
+        guid: this.state.guid
       });
     }
   }
@@ -64,9 +63,7 @@ class EmployeeForm extends React.Component {
   }
     
   
-  render(){    
-    //console.log("!!!!!!!!!!!!!");
-      
+  render(){      
     return (
         <div ref="modal" className="modal modal-fixed-footer" >
           <div className="modal-content">      

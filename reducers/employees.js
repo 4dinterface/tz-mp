@@ -1,7 +1,6 @@
 const employee = (state, action) => {
   switch (action.type) {
     case 'ADD_EMPLOYEE':
-      console.log("add reducer", action);
       return {
         name:{
           first: action.data.firstName,
@@ -11,9 +10,20 @@ const employee = (state, action) => {
       }      
       
     case 'CHANGE_EMPLOYEE':
+      console.log("CHANGE EMPLOYEE", action.data.guid!=state.guid, action.data.guid);  
+      if(action.data.guid==state.guid){
+        console.log(Object.assign({}, state, action.data )) ;
+      }
       
-      return action.data //TODO НУЖНА ЛОГИКА ИЗМЕНЕНИЯ
-    
+      return action.data.guid!=state.guid? state:{
+        guid:state.guid,
+        age:action.data.age,
+        email:state.email,
+        name:{
+          first: action.data.firstName,
+          last: action.data.lastName         
+        }
+      }
     default:
       return state
   }
@@ -27,8 +37,8 @@ const employees = (state=[], action) => {
           employee(undefined, action)
       ]            
     case 'CHANGE_EMPLOYEE':
-      return state.map(item =>{        
-        return employee(item)
+      return state.map(item =>{
+        return employee(item, action)
       })
       
     case 'REMOVE_EMPLOYEE':          
